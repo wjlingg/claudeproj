@@ -19,3 +19,6 @@ Thumbs.db
 
 # Pages staging output
 _site/
+
+# Security scanner reports (list vulnerabilities; keep out of the public repo)
+security-reports/
