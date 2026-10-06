@@ -3,103 +3,181 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IT PMO – Project Board</title>
+<title>IT PMO – Trainer Board</title>
 <style>
-/* ============ Design tokens: corporate blue palette + spacing scale ============ */
+/* ============ Design tokens: black base + neon accents + spacing scale ============ */
 :root {
-  --blue-900: #0a2540;
-  --blue-800: #0f3a6b;
-  --blue-700: #14509a;
-  --blue-600: #1b66c4;
-  --blue-500: #2f80e0;
-  --blue-200: #bcd5f2;
-  --blue-100: #dce9f8;
-  --blue-50:  #eff5fc;
-  --ink: #12263f;
-  --ink-soft: #4a5f78;
-  --line: #cdd9e8;
-  --white: #ffffff;
-  --p-critical: #c62828;
-  --p-high: #e08a00;
-  --p-medium: #1b66c4;
-  --p-low: #8a96a6;
-  --danger-bg: #fdeaea;
-  --warn-bg: #fff4dc;
+  color-scheme: dark;
+  --bg: #07080f;
+  --surface: #0e1020;
+  --surface-2: #14173a;
+  --surface-3: #1c2150;
+  --edge: #2b3163;
+  --ink: #e8ecff;
+  --ink-soft: #9aa3d6;
+  --neon-cyan: #22e6ff;
+  --neon-blue: #4d7cff;
+  --neon-violet: #a66bff;
+  --neon-green: #39ff88;
+  --on-neon: #04101a;
+  --p-critical: #ff3b5c;
+  --p-high: #ffb02e;
+  --p-medium: #4d9bff;
+  --p-low: #8b93b8;
+  --danger-bg: rgba(255, 59, 92, .14);
+  --warn-bg: rgba(255, 176, 46, .14);
+  --glow-cyan: 0 0 14px rgba(34, 230, 255, .45);
+  --glow-green: 0 0 12px rgba(57, 255, 136, .5);
   --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
   --radius: 6px;
+  --radius-lg: 10px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 * { box-sizing: border-box; }
 body {
   margin: 0; font-family: var(--font); color: var(--ink);
-  background: var(--blue-50); line-height: 1.4; font-size: 14px;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(900px 420px at 88% -8%, rgba(166, 107, 255, .16), transparent),
+    radial-gradient(760px 420px at 4% 0%, rgba(34, 230, 255, .11), transparent);
+  background-repeat: no-repeat;
+  line-height: 1.4; font-size: 14px;
 }
-:focus-visible { outline: 3px solid var(--blue-500); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--neon-cyan); outline-offset: 2px; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
-button:disabled { cursor: not-allowed; opacity: .65; }
+button:disabled { cursor: not-allowed; opacity: .55; }
+option { background: var(--surface); color: var(--ink); }
 
 /* ============ Header + summary strip ============ */
 .app-header {
-  background: var(--blue-900); color: var(--white);
+  background: linear-gradient(100deg, #0a0c1c, #171046);
+  color: var(--ink);
+  border-bottom: 1px solid var(--neon-cyan);
+  box-shadow: 0 2px 18px rgba(34, 230, 255, .25);
   padding: var(--sp-3) var(--sp-5);
   display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-4);
 }
-.wordmark { font-size: 22px; font-weight: 800; letter-spacing: .08em; margin: 0; }
-.wordmark span { color: var(--blue-200); font-weight: 400; letter-spacing: .02em; font-size: 14px; margin-left: var(--sp-2); }
+.brand { display: flex; align-items: center; gap: var(--sp-3); }
+.ball { width: 34px; height: 34px; flex: none; filter: drop-shadow(0 0 6px rgba(34, 230, 255, .6)); }
+.trainer { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 150px; font-size: 12px; }
+.trainer-line { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); }
+.trainer-line strong { font-size: 16px; color: var(--neon-green); text-shadow: 0 0 8px rgba(57, 255, 136, .6); }
+.xp-bar { height: 8px; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
+.xp-fill {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+  box-shadow: var(--glow-green);
+  transform-origin: left; transform: scaleX(var(--frac, 0));
+  transition: transform 600ms var(--ease-out);
+}
+.wordmark { font-size: 22px; font-weight: 800; letter-spacing: .08em; margin: 0; text-shadow: 0 0 12px rgba(34, 230, 255, .65); }
+.wordmark span { color: var(--neon-cyan); font-weight: 400; letter-spacing: .02em; font-size: 14px; margin-left: var(--sp-2); text-shadow: none; }
 .summary { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0 auto 0 var(--sp-4); padding: 0; list-style: none; }
 .summary li {
-  background: var(--blue-800); border: 1px solid var(--blue-700);
+  background: var(--surface-2); border: 1px solid var(--edge);
   border-radius: var(--radius); padding: var(--sp-1) var(--sp-3); font-size: 13px;
 }
-.summary strong { font-size: 16px; margin-left: var(--sp-1); }
-.summary .overdue-stat { background: var(--p-critical); border-color: var(--p-critical); }
+.summary strong { font-size: 16px; margin-left: var(--sp-1); color: var(--neon-cyan); }
+.summary .overdue-stat { background: var(--danger-bg); border-color: var(--p-critical); }
+.summary .overdue-stat strong { color: var(--p-critical); text-shadow: 0 0 8px rgba(255, 59, 92, .6); }
 .btn {
-  border: 1px solid var(--blue-600); background: var(--blue-600); color: var(--white);
-  border-radius: var(--radius); padding: var(--sp-2) var(--sp-4); font-weight: 600;
+  border: 1px solid var(--neon-cyan); background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+  color: var(--on-neon); border-radius: var(--radius); padding: var(--sp-2) var(--sp-4); font-weight: 700;
 }
-.btn:hover:not(:disabled) { background: var(--blue-700); }
-.btn-secondary { background: var(--white); color: var(--blue-700); }
-.btn-secondary:hover:not(:disabled) { background: var(--blue-100); }
-.app-header .btn { background: var(--white); color: var(--blue-900); border-color: var(--white); }
-.app-header .btn:hover { background: var(--blue-100); }
+.btn:hover:not(:disabled) { box-shadow: var(--glow-cyan); }
+.btn-secondary { background: transparent; color: var(--neon-cyan); }
+.btn-secondary:hover:not(:disabled) { background: rgba(34, 230, 255, .1); }
 
 /* ============ Filter bar ============ */
 .filters {
   display: flex; flex-wrap: wrap; gap: var(--sp-4); align-items: flex-end;
-  padding: var(--sp-3) var(--sp-5); background: var(--white); border-bottom: 1px solid var(--line);
+  padding: var(--sp-3) var(--sp-5); background: var(--surface); border-bottom: 1px solid var(--edge);
 }
 .filters label, .field label { display: block; font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: var(--sp-1); }
 .filters select, .filters input { min-width: 180px; }
 input, select, textarea {
-  width: 100%; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line);
-  border-radius: var(--radius); background: var(--white);
+  width: 100%; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--edge);
+  border-radius: var(--radius); background: var(--bg); color: var(--ink);
 }
+input:focus, select:focus, textarea:focus { border-color: var(--neon-cyan); box-shadow: var(--glow-cyan); outline: none; }
+input::placeholder, textarea::placeholder { color: var(--ink-soft); opacity: .7; }
+.filters .check { display: flex; align-items: center; gap: var(--sp-2); padding-bottom: var(--sp-2); font-size: 13px; font-weight: 600; color: var(--ink); }
+.filters .check input { width: auto; min-width: 0; margin: 0; accent-color: var(--neon-cyan); }
+.result-count { font-size: 13px; font-weight: 700; color: var(--neon-cyan); margin: 0 0 var(--sp-2); }
 .note { margin-left: auto; font-size: 12px; color: var(--ink-soft); }
+
+/* ============ Team race lane ============ */
+.race { margin: var(--sp-4) var(--sp-5) 0; background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-lg); }
+.race summary { cursor: pointer; padding: var(--sp-3) var(--sp-4); font-weight: 700; color: var(--ink); }
+.race-sub { font-weight: 400; font-size: 12px; color: var(--ink-soft); margin-left: var(--sp-2); }
+.lane { padding: 0 var(--sp-4) var(--sp-3); }
+.race-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.race-row { display: grid; grid-template-columns: 24px 130px 1fr 84px; align-items: center; gap: var(--sp-3); }
+.rank { font-weight: 800; color: var(--neon-violet); text-align: center; }
+.race-row.lead .rank { color: var(--neon-green); text-shadow: 0 0 8px rgba(57, 255, 136, .6); }
+.racer-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.race-stat { font-size: 12px; color: var(--ink-soft); text-align: right; }
+.track { position: relative; height: 44px; background: var(--bg); border: 1px dashed var(--edge); border-radius: 999px; }
+.runner {
+  position: absolute; left: 2px; top: 1px; width: 40px; height: 40px;
+  transform: translateX(calc(var(--run, 0px) * var(--pos, 0) * var(--go, 0)));
+  transition: transform 700ms var(--ease-out);
+}
+.race-list.go { --go: 1; }
+.finish { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+.legend { margin: 0 0 var(--sp-3); font-size: 12px; color: var(--ink-soft); }
+
+/* ============ Creatures (original inline SVG art; gradients are in the .defs svg) ============ */
+.creature { display: block; width: 100%; height: 100%; overflow: visible; }
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 /* ============ Board + columns ============ */
 main { padding: var(--sp-5); }
 .board { display: flex; gap: var(--sp-4); align-items: flex-start; }
 .column {
-  flex: 1 1 0; min-width: 0; background: var(--blue-100); border: 2px solid transparent;
-  border-radius: var(--radius); padding: var(--sp-3); min-height: 200px;
+  flex: 1 1 0; min-width: 0; background: var(--surface); border: 2px solid var(--edge);
+  border-radius: var(--radius-lg); padding: var(--sp-3); min-height: 200px;
 }
-.column.drop-target { border-color: var(--blue-600); background: var(--blue-200); }
+.column.drop-target { border-color: var(--neon-cyan); background: var(--surface-2); box-shadow: var(--glow-cyan); }
 .column-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-3); }
-.column-header h2 { font-size: 15px; margin: 0; color: var(--blue-900); }
+.column-header h2 { font-size: 15px; margin: 0; color: var(--ink); }
 .column-sub { font-size: 11px; color: var(--ink-soft); }
 .count {
-  background: var(--blue-700); color: var(--white); border-radius: 999px;
-  padding: 1px var(--sp-3); font-size: 12px; font-weight: 700;
+  background: rgba(34, 230, 255, .12); color: var(--neon-cyan); border: 1px solid var(--neon-cyan);
+  border-radius: 999px; padding: 1px var(--sp-3); font-size: 12px; font-weight: 700;
 }
 .empty { color: var(--ink-soft); font-size: 12px; text-align: center; padding: var(--sp-4) 0; }
 
 /* ============ Cards ============ */
 .card {
-  position: relative; background: var(--white); border: 1px solid var(--line);
-  border-left: 6px solid var(--p-low); border-radius: var(--radius);
+  position: relative; background: var(--surface-2); border: 1px solid var(--edge);
+  border-left: 6px solid var(--p-low); border-radius: var(--radius-lg);
   padding: var(--sp-3); margin-bottom: var(--sp-3); cursor: grab;
-  box-shadow: 0 1px 2px rgba(10, 37, 64, .08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+}
+.card-head { display: flex; gap: var(--sp-3); align-items: center; }
+.card-head-text { flex: 1; min-width: 0; }
+.avatar {
+  position: relative; flex: none; width: 76px; height: 76px; padding: 3px;
+  border-radius: 50%; border: 2px solid var(--edge);
+  background: radial-gradient(circle at 50% 38%, #272e6a, #0b0d1d 75%);
+}
+.card[data-stage="3"] .avatar { border-color: var(--neon-green); box-shadow: var(--glow-green); }
+.creature-line { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+.creature-line strong { color: var(--ink); }
+.tag.xp { background: rgba(57, 255, 136, .12); color: var(--neon-green); border-color: var(--neon-green); }
+.card.evolve .avatar .creature { animation: evolve 700ms var(--ease-out); }
+.card.evolve .avatar::after {
+  content: ""; position: absolute; inset: -2px; border-radius: 50%;
+  border: 3px solid var(--neon-green); animation: evolve-ring 700ms var(--ease-out) forwards;
+}
+@keyframes evolve { 0% { transform: scale(.6); opacity: .2; } 55% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes evolve-ring { from { transform: scale(1); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
+@media (hover: hover) and (pointer: fine) {
+  .card { transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out), border-color 150ms var(--ease-out); }
+  .card:hover { transform: translateY(-1px); border-color: var(--neon-cyan); box-shadow: var(--glow-cyan); }
 }
 .card.dragging { opacity: .45; }
 .card[data-priority="Critical"] { border-left-color: var(--p-critical); }
@@ -107,90 +185,149 @@ main { padding: var(--sp-5); }
 .card[data-priority="Medium"]   { border-left-color: var(--p-medium); }
 .card[data-priority="Low"]      { border-left-color: var(--p-low); }
 .card-top { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); font-size: 11px; color: var(--ink-soft); }
-.task-id { font-family: ui-monospace, Consolas, monospace; font-weight: 700; }
+.task-id { font-family: ui-monospace, Consolas, monospace; font-weight: 700; color: var(--neon-cyan); }
 .card h3 { font-size: 14px; margin: var(--sp-1) 0; overflow-wrap: anywhere; }
-.project { font-size: 12px; color: var(--blue-700); font-weight: 600; }
+.project { font-size: 12px; color: var(--neon-violet); font-weight: 600; }
 .meta { font-size: 12px; color: var(--ink-soft); margin: var(--sp-1) 0; display: flex; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap; }
 .tags { display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; margin-top: var(--sp-2); }
 .pill, .tag, .badge-overdue { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px var(--sp-2); }
-.pill { color: var(--white); background: var(--p-low); }
+.pill { color: var(--on-neon); background: var(--p-low); }
 .pill[data-priority="Critical"] { background: var(--p-critical); }
-.pill[data-priority="High"]     { background: var(--p-high); color: var(--ink); }
+.pill[data-priority="High"]     { background: var(--p-high); }
 .pill[data-priority="Medium"]   { background: var(--p-medium); }
-.tag { background: var(--blue-100); color: var(--blue-800); border: 1px solid var(--blue-200); border-radius: var(--radius); font-weight: 600; }
-.badge-overdue { background: var(--danger-bg); color: var(--p-critical); border: 1px solid var(--p-critical); }
+.tag { background: rgba(77, 124, 255, .14); color: #aebfff; border: 1px solid var(--edge); border-radius: var(--radius); font-weight: 600; }
+.badge-overdue { background: var(--danger-bg); color: #ff7088; border: 1px solid var(--p-critical); }
 .card-actions { display: flex; gap: var(--sp-2); align-items: center; margin-top: var(--sp-3); position: relative; }
 .card-actions .spacer { flex: 1; }
 .mini {
-  border: 1px solid var(--line); background: var(--white); border-radius: var(--radius);
-  padding: var(--sp-1) var(--sp-2); font-size: 12px; color: var(--blue-800);
+  border: 1px solid var(--edge); background: transparent; border-radius: var(--radius);
+  padding: var(--sp-1) var(--sp-2); font-size: 12px; color: var(--neon-cyan);
 }
-.mini:hover { background: var(--blue-100); }
+.mini:hover { background: var(--surface-3); border-color: var(--neon-cyan); }
 .mini.del { color: var(--p-critical); font-size: 15px; line-height: 1; padding: var(--sp-1) var(--sp-2); }
-.mini.danger { background: var(--p-critical); color: var(--white); border-color: var(--p-critical); }
-.move-menu { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-top: var(--sp-2); padding: var(--sp-2); background: var(--blue-50); border: 1px solid var(--blue-200); border-radius: var(--radius); }
+.mini.danger { background: var(--p-critical); color: var(--on-neon); border-color: var(--p-critical); font-weight: 700; }
+.move-menu { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-top: var(--sp-2); padding: var(--sp-2); background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius); }
 .move-menu .label { font-size: 11px; color: var(--ink-soft); width: 100%; }
 .confirm-row { font-size: 12px; font-weight: 600; color: var(--p-critical); }
 
 /* ============ Dialog / form ============ */
-dialog { border: none; border-radius: var(--radius); padding: 0; width: min(560px, 94vw); max-height: 94vh; }
-dialog::backdrop { background: rgba(10, 37, 64, .55); }
-.dialog-head { background: var(--blue-900); color: var(--white); padding: var(--sp-3) var(--sp-4); display: flex; justify-content: space-between; align-items: center; }
+dialog { border: 1px solid var(--neon-cyan); border-radius: var(--radius-lg); padding: 0; width: min(560px, 94vw); max-height: 94vh; background: var(--surface); color: var(--ink); box-shadow: var(--glow-cyan); }
+dialog::backdrop { background: rgba(2, 3, 10, .75); }
+.dialog-head { background: linear-gradient(100deg, #0a0c1c, #171046); color: var(--ink); padding: var(--sp-3) var(--sp-4); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--edge); }
 .dialog-head h2 { margin: 0; font-size: 17px; }
-.dialog-head .mini { background: transparent; color: var(--white); border-color: var(--blue-700); font-size: 16px; }
+.dialog-head .mini { color: var(--ink); font-size: 16px; }
 form { padding: var(--sp-4); display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3) var(--sp-4); }
 .field.full { grid-column: 1 / -1; }
 .field .hint { font-size: 11px; color: var(--ink-soft); float: right; font-weight: 400; }
-.error { color: var(--p-critical); font-size: 12px; margin: var(--sp-1) 0 0; min-height: 0; }
+.error { color: #ff7088; font-size: 12px; margin: var(--sp-1) 0 0; min-height: 0; }
 .field.invalid input, .field.invalid select, .field.invalid textarea { border-color: var(--p-critical); background: var(--danger-bg); }
 .form-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: var(--sp-2); }
 .req { color: var(--p-critical); }
 
 /* ============ Toasts ============ */
 .toasts { position: fixed; right: var(--sp-4); bottom: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); z-index: 1000; max-width: min(380px, 92vw); }
-.toast { background: var(--blue-900); color: var(--white); border-left: 6px solid var(--blue-500); padding: var(--sp-3) var(--sp-4); border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,.25); }
-.toast.warn { background: var(--warn-bg); color: var(--ink); border-left-color: var(--p-high); }
+.toast { background: var(--surface-3); color: var(--ink); border: 1px solid var(--edge); border-left: 6px solid var(--neon-cyan); padding: var(--sp-3) var(--sp-4); border-radius: var(--radius); box-shadow: 0 4px 16px rgba(0, 0, 0, .6), var(--glow-cyan); }
+.toast.warn { background: var(--warn-bg); border-left-color: var(--p-high); box-shadow: 0 4px 16px rgba(0, 0, 0, .6); }
 
 /* ============ Responsive ============ */
 @media (max-width: 767px) {
   .board { flex-direction: column; align-items: stretch; }
-  .column { min-height: 0; }
+  .column { flex: none; min-height: 0; }
   main, .filters, .app-header { padding-left: var(--sp-4); padding-right: var(--sp-4); }
   .summary { margin-left: 0; }
   .note { margin-left: 0; }
   form { grid-template-columns: 1fr; }
+  .race { margin-left: var(--sp-4); margin-right: var(--sp-4); }
+  .race-row { grid-template-columns: 20px 1fr 70px; }
+  .race-row .track { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .runner, .xp-fill, .card { transition: none; }
+  .card.evolve .avatar .creature, .card.evolve .avatar::after { animation: none; }
 }
 </style>
 </head>
 <body>
 
+<!-- Shared gradients for the creature art -->
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+  <linearGradient id="g-fire" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa94d"/><stop offset="1" stop-color="#e5481f"/></linearGradient>
+  <linearGradient id="g-flame" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd24d"/><stop offset="1" stop-color="#ff5a1f"/></linearGradient>
+  <linearGradient id="g-wing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb066"/><stop offset="1" stop-color="#d9532a"/></linearGradient>
+  <linearGradient id="g-elec" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff07a"/><stop offset="1" stop-color="#f2b800"/></linearGradient>
+  <linearGradient id="g-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ccbff"/><stop offset="1" stop-color="#2b78d6"/></linearGradient>
+  <linearGradient id="g-grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#92e59f"/><stop offset="1" stop-color="#2f9d5a"/></linearGradient>
+  <radialGradient id="g-glow"><stop offset="0" stop-color="#ffb066" stop-opacity=".55"/><stop offset="1" stop-color="#ffb066" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-glow-e"><stop offset="0" stop-color="#fff07a" stop-opacity=".65"/><stop offset="1" stop-color="#fff07a" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-glow-w"><stop offset="0" stop-color="#7ccbff" stop-opacity=".5"/><stop offset="1" stop-color="#7ccbff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-glow-g"><stop offset="0" stop-color="#92e59f" stop-opacity=".5"/><stop offset="1" stop-color="#92e59f" stop-opacity="0"/></radialGradient>
+</defs></svg>
+
 <!-- ============ Header with wordmark, live summary strip and Add Task button ============ -->
 <header class="app-header">
-  <h1 class="wordmark">IT PMO<span>Project Board</span></h1>
+  <div class="brand">
+    <svg class="ball" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="14" fill="#ffffff"/>
+      <path d="M2 16a14 14 0 0 1 28 0z" fill="#22e6ff"/>
+      <path d="M2 16h28" stroke="#07080f" stroke-width="2.5"/>
+      <circle cx="16" cy="16" r="4.5" fill="#ffffff" stroke="#07080f" stroke-width="2.5"/>
+      <circle cx="16" cy="16" r="14" fill="none" stroke="#dce9f8" stroke-width="1.5"/>
+    </svg>
+    <h1 class="wordmark">IT PMO<span>Trainer Board</span></h1>
+  </div>
   <ul class="summary" id="summary" aria-label="Board summary"></ul>
+  <div class="trainer" aria-label="Team trainer progress">
+    <div class="trainer-line"><strong id="trainerLevel">Lv 1</strong><span id="xpText">0 / 50 XP</span></div>
+    <div class="xp-bar" id="xpBar" role="progressbar" aria-label="XP to next level" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0"><span class="xp-fill" id="xpFill"></span></div>
+  </div>
   <button type="button" class="btn" id="openAdd">+ Add Task</button>
 </header>
 
 <!-- ============ Filter bar ============ -->
 <section class="filters" aria-label="Board filters">
   <div>
+    <label for="fSearch">Search</label>
+    <input id="fSearch" type="search" placeholder="Title, ID or project">
+  </div>
+  <div>
     <label for="fProject">Project</label>
     <select id="fProject"><option value="">All projects</option></select>
+  </div>
+  <div>
+    <label for="fStatus">Status</label>
+    <select id="fStatus"><option value="">All statuses</option></select>
+  </div>
+  <div>
+    <label for="fPriority">Priority</label>
+    <select id="fPriority"><option value="">All priorities</option></select>
   </div>
   <div>
     <label for="fAssignee">Assignee contains</label>
     <input id="fAssignee" type="search" placeholder="e.g. Priya">
   </div>
   <div>
-    <label for="fPriority">Priority</label>
-    <select id="fPriority"><option value="">All priorities</option></select>
+    <label for="fSort">Sort cards</label>
+    <select id="fSort">
+      <option value="">Board order</option>
+      <option value="due">Due date, earliest first</option>
+      <option value="priority">Priority, highest first</option>
+    </select>
   </div>
+  <label class="check"><input id="fOverdue" type="checkbox"> Overdue only</label>
   <button type="button" class="btn btn-secondary" id="clearFilters">Clear filters</button>
-  <p class="note">Demo data lives in memory only — refreshing the page resets the board.</p>
+  <p class="note">Demo data lives in memory only. Refreshing the page resets the board, XP and level.</p>
 </section>
+
+<!-- ============ Team race lane (rendered by renderRace) ============ -->
+<details class="race" id="raceDetails" open>
+  <summary>Team race<span class="race-sub">Each racer advances as their tasks move toward Done</span></summary>
+  <div class="lane" id="raceLane"></div>
+</details>
 
 <!-- ============ Kanban board (rendered by renderBoard) ============ -->
 <main>
+  <p class="result-count" id="resultCount" aria-live="polite"></p>
+  <p class="legend">Cards evolve as they move: Backlog is stage 1, In Progress is stage 2, Done is the final form. Blocked tasks take a nap. Finish a task to earn XP, with a bonus for on-time delivery.</p>
   <section class="board" id="board" aria-label="Kanban board"></section>
 </main>
 
@@ -276,10 +413,31 @@ const PROJECTS = ["Core Banking Upgrade", "Digital Channels", "Cybersecurity Upl
 const CATEGORIES = ["Application Development", "Infrastructure", "Cybersecurity", "Data", "Compliance", "Vendor"];
 const PRIORITIES = ["Critical", "High", "Medium", "Low"];
 
+/* ---- Gamification reference data (all derived at render time, never stored) ---- */
+const STAGE = { "Backlog": 1, "In Progress": 2, "Blocked": 2, "Done": 3 };
+const FAMILIES = { Critical: "fire", High: "electric", Medium: "water", Low: "grass" };
+const CREATURES = {
+  fire:     ["Emberlet", "Flamewing", "Pyrodrake"],
+  electric: ["Sparkit", "Voltrix", "Stormaw"],
+  water:    ["Aquip", "Tidefin", "Tsunari"],
+  grass:    ["Sprigit", "Bloomtail", "Verdarch"]
+};
+const XP_BY_PRIORITY = { Critical: 40, High: 30, Medium: 20, Low: 10 };
+const ON_TIME_BONUS = 10;
+const XP_PER_LEVEL = 50;
+const RACE_PROGRESS = { "Backlog": 0, "In Progress": 0.4, "Blocked": 0.2, "Done": 1 };
+const PRIORITY_RANK = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+
 /* ============ State: single source of truth (in memory only) ============ */
+function defaultFilters() {
+  return { search: "", project: "", status: "", priority: "", assignee: "", sort: "", overdueOnly: false };
+}
 const state = {
   tasks: [],
-  filters: { project: "", assignee: "", priority: "" },
+  filters: defaultFilters(),
+  lastLevel: 1,         // for the level-up toast
+  evolvedId: null,      // card that just reached Done (plays the evolve animation once)
+  raceSig: "",          // skips re-rendering the race lane when nothing changed
   nextId: 1,
   moveOpenId: null,     // card whose "Move" menu is open
   confirmDeleteId: null // card showing inline "Delete? Yes / No"
@@ -316,23 +474,197 @@ function seedTasks() {
     ["Data lineage mapping for regulatory reports", "Document lineage for the quarterly liquidity reporting pipeline.", "Data & Analytics", "Data", "Sofia Alvarez", "Medium", 30, "Backlog"],
     ["Quarterly access recertification – IT systems", "Complete manager attestation for privileged access.", "Cybersecurity Uplift", "Compliance", "Daniel Wu", "Low", 14, "Backlog"],
     ["Decommission legacy SWIFT gateway hardware", "Hardware retired and assets removed from CMDB.", "Infrastructure & Cloud", "Infrastructure", "Hannah Berg", "Medium", -10, "Done"],
-    ["Renew card-processing vendor SLA", "Renegotiate uptime and incident response terms.", "Vendor Management", "Vendor", "Omar Haddad", "High", 3, "Blocked"]
+    ["Renew card-processing vendor SLA", "Renegotiate uptime and incident response terms.", "Vendor Management", "Vendor", "Omar Haddad", "High", 3, "Blocked"],
+    ["Rotate TLS certificates on internet banking gateway", "Certificates rotated and monitoring confirmed.", "Cybersecurity Uplift", "Cybersecurity", "Marcus Tan", "High", -3, "Done"],
+    ["Refresh DR runbook for card switch", "Update failover steps after the last DR test.", "Infrastructure & Cloud", "Infrastructure", "Hannah Berg", "Low", 12, "In Progress"]
   ];
   seed.forEach((s) => state.tasks.push({
     id: makeId(), title: s[0], description: s[1], project: s[2], category: s[3],
-    assignee: s[4], priority: s[5], dueDate: offsetDate(s[6]), status: s[7]
+    assignee: s[4], priority: s[5], dueDate: offsetDate(s[6]), status: s[7],
+    doneOn: s[7] === "Done" ? offsetDate(s[6]) : null   // seeded Done tasks finished on their due date
   }));
 }
 
-/* ============ Filtering ============ */
+/* ============ Filtering and sorting ============ */
 function applyFilters(tasks) {
   const f = state.filters;
   const needle = f.assignee.trim().toLowerCase();
+  const query = f.search.trim().toLowerCase();
   return tasks.filter((t) =>
     (!f.project || t.project === f.project) &&
+    (!f.status || t.status === f.status) &&
     (!f.priority || t.priority === f.priority) &&
-    (!needle || t.assignee.toLowerCase().includes(needle))
+    (!needle || t.assignee.toLowerCase().includes(needle)) &&
+    (!f.overdueOnly || isOverdue(t)) &&
+    (!query || [t.title, t.id, t.project, t.description].some((s) => s.toLowerCase().includes(query)))
   );
+}
+
+function sortTasks(tasks) {
+  const mode = state.filters.sort;
+  if (!mode) return tasks;
+  const byDue = (a, b) => a.dueDate.localeCompare(b.dueDate);
+  return tasks.slice().sort(mode === "due"
+    ? byDue
+    : (a, b) => (PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority]) || byDue(a, b));
+}
+
+/* ============ Gamification: XP, levels, creatures ============ */
+function taskXp(task) {
+  if (task.status !== "Done") return 0;
+  const onTime = task.doneOn && task.doneOn <= task.dueDate;
+  return (XP_BY_PRIORITY[task.priority] || 0) + (onTime ? ON_TIME_BONUS : 0);
+}
+function totalXp() { return state.tasks.reduce((sum, t) => sum + taskXp(t), 0); }
+function levelFor(xp) { return Math.floor(xp / XP_PER_LEVEL) + 1; }
+
+function checkLevelUp() {
+  const level = levelFor(totalXp());
+  if (level > state.lastLevel) showToast(`Level up! Your team reached Lv ${level}.`);
+  state.lastLevel = level;
+}
+
+function hashString(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+// Original creature art: richer inline SVG (gradients live in the hidden <svg class="defs"> at the top of <body>).
+function flameSvg(x, y, s) {
+  const d = "M0 -14C7 -6 9 0 3 5C1 7 -3 7 -5 4C-9 -1 -6 -7 0 -14Z";
+  return `<path transform="translate(${x} ${y}) scale(${s})" fill="url(#g-flame)" d="${d}"/>` +
+         `<path transform="translate(${x} ${y + 1}) scale(${s * 0.5})" fill="#fff3b0" d="${d}"/>`;
+}
+function flameTail(x, y, s) {
+  return `<path d="M42 52C${x} ${y + 24} ${x + 4} ${y + 10} ${x} ${y + 3}" fill="none" stroke="url(#g-fire)" stroke-width="5" stroke-linecap="round"/>` + flameSvg(x, y, s);
+}
+function bloomSvg(x, y, r, color) {
+  let s = "";
+  for (let a = 0; a < 5; a++) {
+    const ang = (a * 72 - 90) * Math.PI / 180;
+    s += `<circle cx="${(x + r * 0.95 * Math.cos(ang)).toFixed(1)}" cy="${(y + r * 0.95 * Math.sin(ang)).toFixed(1)}" r="${(r * 0.62).toFixed(1)}" fill="${color}"/>`;
+  }
+  return s + `<circle cx="${x}" cy="${y}" r="${(r * 0.5).toFixed(1)}" fill="#ffd54a"/>`;
+}
+function earsSvg(h, tip) {
+  const cy = 28 - h, ty = 28 - h - tip + 6;
+  return `<ellipse cx="22" cy="${cy}" rx="4" ry="${h}" transform="rotate(-18 22 ${cy})" fill="url(#g-elec)"/>` +
+         `<ellipse cx="42" cy="${cy}" rx="4" ry="${h}" transform="rotate(18 42 ${cy})" fill="url(#g-elec)"/>` +
+         `<ellipse cx="20" cy="${ty}" rx="3.2" ry="${(tip * 0.45).toFixed(1)}" transform="rotate(-18 20 ${ty})" fill="#4a6fd8"/>` +
+         `<ellipse cx="44" cy="${ty}" rx="3.2" ry="${(tip * 0.45).toFixed(1)}" transform="rotate(18 44 ${ty})" fill="#4a6fd8"/>`;
+}
+function eyesSvg(y, dx, r, sleepy) {
+  if (sleepy) {
+    return `<path d="M${32 - dx - r} ${y}q${r} ${r} ${2 * r} 0M${32 + dx - r} ${y}q${r} ${r} ${2 * r} 0" fill="none" stroke="#12263f" stroke-width="1.8" stroke-linecap="round"/>` +
+           '<text x="46" y="12" font-size="11" font-weight="700" fill="#9aa3d6" font-family="system-ui,sans-serif">z</text>';
+  }
+  return [-dx, dx].map((o) =>
+    `<circle cx="${32 + o}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${32 + o}" cy="${y + 0.4}" r="${(r * 0.62).toFixed(1)}" fill="#12263f"/>` +
+    `<circle cx="${(32 + o + r * 0.25).toFixed(1)}" cy="${(y - r * 0.2).toFixed(1)}" r="${(r * 0.22).toFixed(1)}" fill="#fff"/>`).join("");
+}
+
+const CREATURE_DRAW = {
+  fire: [
+    () => flameTail(52, 37, 0.7) +
+      '<ellipse cx="32" cy="44" rx="13" ry="12" fill="url(#g-fire)"/><ellipse cx="32" cy="47" rx="7.5" ry="8.5" fill="#ffe2b8"/>' +
+      '<ellipse cx="20" cy="45" rx="3" ry="5" transform="rotate(15 20 45)" fill="url(#g-fire)"/><ellipse cx="44" cy="45" rx="3" ry="5" transform="rotate(-15 44 45)" fill="url(#g-fire)"/>' +
+      '<ellipse cx="25" cy="57" rx="5" ry="3" fill="#c4381a"/><ellipse cx="39" cy="57" rx="5" ry="3" fill="#c4381a"/>' +
+      '<circle cx="32" cy="27" r="12" fill="url(#g-fire)"/><ellipse cx="32" cy="32" rx="5" ry="3.5" fill="#ffb066"/>',
+    () => flameTail(54, 33, 0.95) +
+      '<path d="M22 34C12 28 8 30 6 24C14 24 18 26 22 30Z" fill="#ffb066"/><path d="M42 34C52 28 56 30 58 24C50 24 46 26 42 30Z" fill="#ffb066"/>' +
+      '<ellipse cx="32" cy="41" rx="12" ry="15" fill="url(#g-fire)"/><ellipse cx="32" cy="45" rx="7" ry="10" fill="#ffe2b8"/>' +
+      '<ellipse cx="19" cy="42" rx="3" ry="6" transform="rotate(15 19 42)" fill="url(#g-fire)"/><ellipse cx="45" cy="42" rx="3" ry="6" transform="rotate(-15 45 42)" fill="url(#g-fire)"/>' +
+      '<ellipse cx="25" cy="57" rx="5.5" ry="3" fill="#c4381a"/><ellipse cx="39" cy="57" rx="5.5" ry="3" fill="#c4381a"/>' +
+      '<polygon points="26,16 21,4 31,12" fill="#f7e1b5"/><polygon points="38,16 43,4 33,12" fill="#f7e1b5"/>' +
+      '<circle cx="32" cy="23" r="10.5" fill="url(#g-fire)"/><ellipse cx="32" cy="28" rx="5" ry="3.3" fill="#ffb066"/>',
+    () => '<circle cx="32" cy="34" r="30" fill="url(#g-glow)"/>' +
+      '<path d="M24 33L3 12L9 29L1 32L11 39L7 47L25 43Z" fill="url(#g-wing)" stroke="#c4381a" stroke-width="1" stroke-linejoin="round"/><path d="M24 33L9 29M24 36L11 39" stroke="#c4381a" stroke-width=".8"/>' +
+      '<g transform="translate(64 0) scale(-1 1)"><path d="M24 33L3 12L9 29L1 32L11 39L7 47L25 43Z" fill="url(#g-wing)" stroke="#c4381a" stroke-width="1" stroke-linejoin="round"/><path d="M24 33L9 29M24 36L11 39" stroke="#c4381a" stroke-width=".8"/></g>' +
+      flameTail(55, 29, 1.2) +
+      '<ellipse cx="32" cy="43" rx="12" ry="15" fill="url(#g-fire)"/><ellipse cx="32" cy="46" rx="7" ry="11" fill="#ffe2b8"/>' +
+      '<path d="M27 40h10M27 45h10M28 50h8" stroke="#f0b87a" stroke-width="1.2"/>' +
+      '<ellipse cx="25" cy="58" rx="6" ry="3" fill="#c4381a"/><ellipse cx="39" cy="58" rx="6" ry="3" fill="#c4381a"/>' +
+      '<path d="M26 14C22 8 18 7 15 8C19 11 22 15 25 18Z" fill="#f7e1b5"/><path d="M38 14C42 8 46 7 49 8C45 11 42 15 39 18Z" fill="#f7e1b5"/>' +
+      '<circle cx="32" cy="20" r="9.5" fill="url(#g-fire)"/><ellipse cx="32" cy="25" rx="5.5" ry="3.8" fill="#ffb066"/>'
+  ],
+  electric: [
+    () => '<polygon points="44,50 52,42 48,42 56,30 46,40 50,40" fill="#ffd21f" stroke="#a87800" stroke-width="1" stroke-linejoin="round"/>' +
+      earsSvg(11, 9) +
+      '<ellipse cx="32" cy="44" rx="14" ry="12" fill="url(#g-elec)"/><ellipse cx="32" cy="47" rx="8" ry="7" fill="#fff3b8"/>' +
+      '<ellipse cx="24" cy="57" rx="5" ry="3" fill="#e0a400"/><ellipse cx="40" cy="57" rx="5" ry="3" fill="#e0a400"/>' +
+      '<circle cx="32" cy="30" r="12" fill="url(#g-elec)"/><circle cx="21" cy="34" r="3" fill="#7cc4ff"/><circle cx="43" cy="34" r="3" fill="#7cc4ff"/>',
+    () => '<polygon points="44,52 54,40 49,40 60,24 47,38 52,38" fill="#ffd21f" stroke="#a87800" stroke-width="1" stroke-linejoin="round"/>' +
+      earsSvg(14, 10) +
+      '<ellipse cx="32" cy="42" rx="13" ry="15" fill="url(#g-elec)"/><ellipse cx="32" cy="46" rx="7.5" ry="10" fill="#fff3b8"/>' +
+      '<polygon points="26,34 32,40 38,34 36,42 28,42" fill="#ffe66b"/>' +
+      '<ellipse cx="24" cy="57" rx="5.5" ry="3" fill="#e0a400"/><ellipse cx="40" cy="57" rx="5.5" ry="3" fill="#e0a400"/>' +
+      '<circle cx="32" cy="26" r="11.5" fill="url(#g-elec)"/><circle cx="21" cy="30" r="3" fill="#7cc4ff"/><circle cx="43" cy="30" r="3" fill="#7cc4ff"/>',
+    () => '<circle cx="32" cy="34" r="30" fill="url(#g-glow-e)"/>' +
+      '<polygon points="44,54 56,40 50,40 63,18 47,38 53,38" fill="#ffd21f" stroke="#a87800" stroke-width="1" stroke-linejoin="round"/>' +
+      '<polyline points="6,30 12,26 10,22 16,20" fill="none" stroke="#fff6a0" stroke-width="1.4"/><polyline points="58,26 52,22 54,18 48,16" fill="none" stroke="#fff6a0" stroke-width="1.4"/>' +
+      earsSvg(16, 11) +
+      '<polygon points="20,24 8,16 21,19" fill="#ffd21f"/><polygon points="44,24 56,16 43,19" fill="#ffd21f"/><polygon points="22,32 9,30 22,28" fill="#ffd21f"/><polygon points="42,32 55,30 42,28" fill="#ffd21f"/>' +
+      '<ellipse cx="32" cy="43" rx="13" ry="15" fill="url(#g-elec)"/><ellipse cx="32" cy="46" rx="7.5" ry="10" fill="#fff3b8"/>' +
+      '<path d="M22 40l5 2M42 40l-5 2M23 48l5 1M41 48l-5 1" stroke="#7a5a00" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<ellipse cx="24" cy="58" rx="6" ry="3" fill="#e0a400"/><ellipse cx="40" cy="58" rx="6" ry="3" fill="#e0a400"/>' +
+      '<circle cx="32" cy="26" r="11.5" fill="url(#g-elec)"/><circle cx="21" cy="30" r="3" fill="#7cc4ff"/><circle cx="43" cy="30" r="3" fill="#7cc4ff"/>'
+  ],
+  water: [
+    () => '<path d="M46 50C54 52 56 46 54 42C52 46 50 47 46 46Z" fill="#2b78d6"/>' +
+      '<path d="M32 8C37 14 38 18 32 19C26 18 27 14 32 8Z" fill="#2b78d6"/>' +
+      '<ellipse cx="32" cy="44" rx="15" ry="12" fill="url(#g-water)"/><ellipse cx="32" cy="47" rx="9" ry="8" fill="#dff0ff"/>' +
+      '<ellipse cx="17" cy="47" rx="4.5" ry="2.8" transform="rotate(-25 17 47)" fill="#2b78d6"/><ellipse cx="47" cy="47" rx="4.5" ry="2.8" transform="rotate(25 47 47)" fill="#2b78d6"/>' +
+      '<ellipse cx="25" cy="57" rx="5" ry="2.8" fill="#1d5fb0"/><ellipse cx="39" cy="57" rx="5" ry="2.8" fill="#1d5fb0"/>' +
+      '<circle cx="32" cy="28" r="12" fill="url(#g-water)"/>',
+    () => '<path d="M44 52C54 56 60 48 55 40C54 46 50 48 45 48Z" fill="#2b78d6"/><polygon points="55,40 61,36 59,44" fill="#2b78d6"/>' +
+      '<polygon points="24,18 14,6 28,13" fill="#2b78d6"/><polygon points="40,18 50,6 36,13" fill="#2b78d6"/>' +
+      '<ellipse cx="32" cy="41" rx="13" ry="15" fill="url(#g-water)"/><ellipse cx="32" cy="45" rx="7.5" ry="10" fill="#dff0ff"/>' +
+      '<path d="M19 38C10 36 8 42 8 46C14 46 18 44 20 42Z" fill="#2b78d6"/><path d="M45 38C54 36 56 42 56 46C50 46 46 44 44 42Z" fill="#2b78d6"/>' +
+      '<ellipse cx="25" cy="57" rx="5.5" ry="2.8" fill="#1d5fb0"/><ellipse cx="39" cy="57" rx="5.5" ry="2.8" fill="#1d5fb0"/>' +
+      '<circle cx="32" cy="24" r="11" fill="url(#g-water)"/>',
+    () => '<circle cx="32" cy="32" r="30" fill="url(#g-glow-w)"/>' +
+      '<polygon points="4,52 12,46 14,58" fill="#2b78d6"/>' +
+      '<path d="M10 54C16 36 34 56 38 38C40 30 42 27 46 24" fill="none" stroke="url(#g-water)" stroke-width="12" stroke-linecap="round"/>' +
+      '<path d="M10 54C16 38 34 54 38 40" fill="none" stroke="#dff0ff" stroke-width="3" stroke-linecap="round" opacity=".8"/>' +
+      '<polygon points="20,42 24,32 28,44" fill="#1d5fb0"/><polygon points="34,50 40,42 40,54" fill="#1d5fb0"/>' +
+      '<path d="M40 14C44 4 54 6 56 12C50 10 46 12 46 16Z" fill="#2b78d6"/>' +
+      '<circle cx="47" cy="22" r="9.5" fill="url(#g-water)"/><ellipse cx="53" cy="25" rx="5" ry="3.4" fill="#9ed7ff"/>' +
+      '<circle cx="49" cy="20" r="2.6" fill="#fff"/><circle cx="49.4" cy="20.3" r="1.6" fill="#12263f"/>'
+  ],
+  grass: [
+    () => '<ellipse cx="32" cy="44" rx="14" ry="12" fill="url(#g-grass)"/><ellipse cx="32" cy="47" rx="8" ry="7" fill="#e4f7d8"/>' +
+      '<ellipse cx="25" cy="57" rx="5" ry="3" fill="#237a47"/><ellipse cx="39" cy="57" rx="5" ry="3" fill="#237a47"/>' +
+      '<circle cx="32" cy="29" r="11.5" fill="url(#g-grass)"/>' +
+      '<ellipse cx="32" cy="16" rx="8" ry="6" fill="#237a47"/><path d="M32 12C32 6 36 3 40 4C39 9 36 11 32 12Z" fill="#92e59f"/><path d="M32 12C32 8 29 6 26 7C27 10 29 11 32 12Z" fill="#92e59f"/>',
+    () => '<path d="M44 52C54 52 58 44 54 38" fill="none" stroke="#2f9d5a" stroke-width="3" stroke-linecap="round"/>' + bloomSvg(54, 34, 5, "#ff9fc4") +
+      '<ellipse cx="20" cy="14" rx="3.5" ry="9" transform="rotate(-25 20 14)" fill="#2f9d5a"/><ellipse cx="44" cy="14" rx="3.5" ry="9" transform="rotate(25 44 14)" fill="#2f9d5a"/>' +
+      '<ellipse cx="32" cy="42" rx="13" ry="14" fill="url(#g-grass)"/><ellipse cx="32" cy="46" rx="7.5" ry="9" fill="#e4f7d8"/>' +
+      '<ellipse cx="25" cy="57" rx="5.5" ry="3" fill="#237a47"/><ellipse cx="39" cy="57" rx="5.5" ry="3" fill="#237a47"/>' +
+      '<circle cx="32" cy="26" r="11" fill="url(#g-grass)"/>',
+    () => '<circle cx="32" cy="32" r="30" fill="url(#g-glow-g)"/>' +
+      '<circle cx="19" cy="17" r="9" fill="#2f9d5a"/><circle cx="32" cy="11" r="10" fill="#3dbb6e"/><circle cx="45" cy="17" r="9" fill="#2f9d5a"/>' +
+      bloomSvg(19, 13, 4, "#ff9fc4") + bloomSvg(32, 7, 4.4, "#ffffff") + bloomSvg(45, 13, 4, "#ff9fc4") +
+      '<path d="M12 40C6 38 4 46 8 52M52 40C58 38 60 46 56 52" fill="none" stroke="#2f9d5a" stroke-width="3" stroke-linecap="round"/>' +
+      '<ellipse cx="32" cy="40" rx="16" ry="17" fill="url(#g-grass)"/><ellipse cx="32" cy="45" rx="9" ry="10" fill="#e4f7d8"/>' +
+      '<ellipse cx="24" cy="58" rx="7" ry="3" fill="#237a47"/><ellipse cx="40" cy="58" rx="7" ry="3" fill="#237a47"/>'
+  ]
+};
+
+// Face position per family and stage: [eye y, eye spread, eye radius]; null = drawn into the art itself
+const FACE = {
+  fire:     [[26, 5.5, 3.2], [22, 5, 2.9], [19, 4.5, 2.4]],
+  electric: [[29, 6, 3], [25, 5.5, 2.9], [25, 5.5, 2.9]],
+  water:    [[28, 5.5, 3.2], [24, 5, 3], null],
+  grass:    [[29, 5.5, 3.2], [26, 5, 3], [36, 6, 2.8]]
+};
+
+function creatureSvg(family, stage, sleepy, label) {
+  const face = FACE[family][stage - 1];
+  const eyes = face ? eyesSvg(face[0], face[1], face[2], sleepy) : "";
+  return `<svg class="creature" viewBox="0 0 64 64" role="img" aria-label="${escapeHtml(label)}">` +
+    '<ellipse cx="32" cy="59" rx="17" ry="2.5" fill="#000" opacity=".4"/>' +
+    CREATURE_DRAW[family][stage - 1]() + eyes + "</svg>";
 }
 
 /* ============ Rendering ============ */
@@ -366,14 +698,27 @@ function renderCard(task) {
       ).join("") + "</div>";
   }
 
-  return `<article class="card" draggable="true" data-id="${id}" data-priority="${escapeHtml(task.priority)}">
-    <div class="card-top"><span class="task-id">${id}</span>${overdue}</div>
+  const family = FAMILIES[task.priority] || "water";
+  const stage = STAGE[task.status] || 1;
+  const sleepy = task.status === "Blocked";
+  const name = CREATURES[family][stage - 1];
+  const label = `${name}, stage ${stage} of 3${sleepy ? ", napping" : ""}`;
+  const xpTag = task.status === "Done" ? `<span class="tag xp">+${taskXp(task)} XP</span>` : "";
+
+  return `<article class="card${state.evolvedId === task.id ? " evolve" : ""}" draggable="true" data-id="${id}" data-stage="${stage}" data-priority="${escapeHtml(task.priority)}">
+    <div class="card-head">
+      <div class="avatar">${creatureSvg(family, stage, sleepy, label)}</div>
+      <div class="card-head-text">
+        <div class="card-top"><span class="task-id">${id}</span>${overdue}</div>
+        <div class="creature-line"><strong>${escapeHtml(name)}</strong> stage ${stage} of 3${sleepy ? ", napping" : ""}</div>
+      </div>
+    </div>
     <h3>${escapeHtml(task.title)}</h3>
     <div class="project">${escapeHtml(task.project)}</div>
     <div class="meta"><span>👤 ${escapeHtml(task.assignee)}</span><span>📅 ${escapeHtml(formatDate(task.dueDate))}</span></div>
     <div class="tags">
       <span class="pill" data-priority="${escapeHtml(task.priority)}">${escapeHtml(task.priority)}</span>
-      <span class="tag">${escapeHtml(task.category)}</span>
+      <span class="tag">${escapeHtml(task.category)}</span>${xpTag}
     </div>
     ${actions}${menu}
   </article>`;
@@ -388,9 +733,62 @@ function renderSummary() {
   $("summary").innerHTML = items.join("");
 }
 
+function renderTrainer() {
+  const xp = totalXp();
+  const into = xp % XP_PER_LEVEL;
+  $("trainerLevel").textContent = "Lv " + levelFor(xp);
+  $("xpText").textContent = into + " / " + XP_PER_LEVEL + " XP";
+  $("xpFill").style.setProperty("--frac", into / XP_PER_LEVEL);
+  $("xpBar").setAttribute("aria-valuenow", into);
+}
+
+function raceRows() {
+  const byPerson = new Map();
+  state.tasks.forEach((t) => {
+    const key = t.assignee.trim();
+    if (!byPerson.has(key)) byPerson.set(key, []);
+    byPerson.get(key).push(t);
+  });
+  return Array.from(byPerson, ([name, list]) => ({
+    name,
+    count: list.length,
+    done: list.filter((t) => t.status === "Done").length,
+    pos: list.reduce((sum, t) => sum + RACE_PROGRESS[t.status], 0) / list.length
+  })).sort((a, b) => (b.pos - a.pos) || a.name.localeCompare(b.name));
+}
+
+// Distance the runner can travel; measured from the track so it works at any width.
+function setRaceRun() {
+  const lane = $("raceLane");
+  const track = lane.querySelector(".track");
+  if (track) lane.style.setProperty("--run", Math.max(0, track.clientWidth - 72) + "px");
+}
+
+function renderRace() {
+  const rows = raceRows();
+  const sig = JSON.stringify(rows);
+  if (sig === state.raceSig) return;
+  state.raceSig = sig;
+  const families = Object.values(FAMILIES);
+  $("raceLane").innerHTML = '<ol class="race-list">' + rows.map((r, i) => {
+    const stage = r.pos >= 0.67 ? 3 : r.pos >= 0.34 ? 2 : 1;
+    const family = families[hashString(r.name) % families.length];
+    return `<li class="race-row${i === 0 ? " lead" : ""}">
+      <span class="rank" aria-label="Position ${i + 1}">${i + 1}</span>
+      <span class="racer-name">${escapeHtml(r.name)}</span>
+      <div class="track"><div class="runner" style="--pos:${r.pos.toFixed(3)}">${creatureSvg(family, stage, false, escapeHtml(r.name) + " racer")}</div><span class="finish" aria-hidden="true">🏁</span></div>
+      <span class="race-stat">${r.done}/${r.count} done</span>
+    </li>`;
+  }).join("") + "</ol>";
+  setRaceRun();
+  const list = $("raceLane").querySelector(".race-list");
+  requestAnimationFrame(() => requestAnimationFrame(() => list.classList.add("go")));
+}
+
 // The only function that writes card/column markup.
 function renderBoard() {
-  const visible = applyFilters(state.tasks);
+  const visible = sortTasks(applyFilters(state.tasks));
+  $("resultCount").textContent = `Showing ${visible.length} of ${state.tasks.length} tasks`;
   $("board").innerHTML = STATUSES.map((s) => {
     const cards = visible.filter((t) => t.status === s.name);
     return `<section class="column" data-status="${escapeHtml(s.name)}" aria-label="${escapeHtml(s.name)} column">
@@ -401,22 +799,40 @@ function renderBoard() {
       ${cards.length ? cards.map(renderCard).join("") : '<p class="empty">No tasks</p>'}
     </section>`;
   }).join("");
+  state.evolvedId = null;   // the evolve animation plays once, on the render that added the class
   renderSummary();
+  renderTrainer();
+  renderRace();
 }
 
 /* ============ State mutations ============ */
 function addTask(data) {
-  const task = Object.assign({ id: makeId() }, data);
+  const task = Object.assign({ id: makeId(), doneOn: data.status === "Done" ? todayISO() : null }, data);
   state.tasks.push(task);
   renderBoard();
+  checkLevelUp();
   return task;
 }
 
 function moveTask(id, status) {
   const task = state.tasks.find((t) => t.id === id);
-  if (task && STATUSES.some((s) => s.name === status) && task.status !== status) task.status = status;
+  let evolved = false;
+  if (task && STATUSES.some((s) => s.name === status) && task.status !== status) {
+    task.status = status;
+    evolved = status === "Done";
+    task.doneOn = evolved ? todayISO() : null;
+    if (evolved) state.evolvedId = id;
+  }
   state.moveOpenId = null;
   renderBoard();
+  if (evolved) {
+    const xp = taskXp(task);
+    const name = CREATURES[FAMILIES[task.priority] || "water"][2];
+    showToast(`${task.id} evolved into ${name}. +${xp} XP`);
+    checkLevelUp();
+  } else {
+    state.lastLevel = levelFor(totalXp());   // moving a task out of Done can lower XP; no toast
+  }
 }
 
 function deleteTask(id) {
@@ -424,6 +840,7 @@ function deleteTask(id) {
   state.confirmDeleteId = null;
   state.moveOpenId = null;
   renderBoard();
+  state.lastLevel = levelFor(totalXp());
 }
 
 /* ============ Toasts ============ */
@@ -628,16 +1045,24 @@ function init() {
   fillSelect($("status"), STATUSES.map((s) => s.name), "Backlog");
   fillSelect($("fProject"), PROJECTS);
   fillSelect($("fPriority"), PRIORITIES);
+  fillSelect($("fStatus"), STATUSES.map((s) => s.name));
 
-  // Filters
-  $("fProject").addEventListener("change", (e) => { state.filters.project = e.target.value; renderBoard(); });
-  $("fPriority").addEventListener("change", (e) => { state.filters.priority = e.target.value; renderBoard(); });
-  $("fAssignee").addEventListener("input", (e) => { state.filters.assignee = e.target.value; renderBoard(); });
+  // Filters: control id -> state.filters key
+  const filterControls = { fSearch: "search", fProject: "project", fStatus: "status", fPriority: "priority", fAssignee: "assignee", fSort: "sort" };
+  Object.keys(filterControls).forEach((cid) => {
+    $(cid).addEventListener("input", (e) => { state.filters[filterControls[cid]] = e.target.value; renderBoard(); });
+  });
+  $("fOverdue").addEventListener("change", (e) => { state.filters.overdueOnly = e.target.checked; renderBoard(); });
   $("clearFilters").addEventListener("click", () => {
-    state.filters = { project: "", assignee: "", priority: "" };
-    $("fProject").value = ""; $("fPriority").value = ""; $("fAssignee").value = "";
+    state.filters = defaultFilters();
+    Object.keys(filterControls).forEach((cid) => { $(cid).value = ""; });
+    $("fOverdue").checked = false;
     renderBoard();
   });
+
+  // Race lane geometry depends on the track width
+  window.addEventListener("resize", setRaceRun);
+  $("raceDetails").addEventListener("toggle", setRaceRun);
 
   // Dialog + form
   $("openAdd").addEventListener("click", openAddDialog);
@@ -662,6 +1087,7 @@ function init() {
   });
 
   seedTasks();
+  state.lastLevel = levelFor(totalXp());
   renderBoard();
 }
 
