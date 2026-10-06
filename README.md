@@ -14,6 +14,7 @@ A single-file, Pokémon-style Kanban board for an IT PMO team at a fictitious ba
 - Evolving creatures: each card shows an original inline-SVG creature. Priority picks the line (fire, electric, water, grass) and status picks the stage. Reaching Done plays an evolve animation, and Blocked tasks nap
 - Trainer level and XP bar: finishing a task earns XP by priority, with a bonus for on-time delivery, plus a level-up toast
 - Team race lane: one racer per assignee advances as their tasks move toward Done
+- Progress summary beside the race: overall percent done and not done, a status breakdown bar, and percent done per project
 - Add Task dialog with inline validation
 - Priority signals and automatic overdue highlighting
 - Inline "Delete? Yes / No" confirmation (no browser dialogs)

@@ -109,7 +109,32 @@ input::placeholder, textarea::placeholder { color: var(--ink-soft); opacity: .7;
 .note { margin-left: auto; font-size: 12px; color: var(--ink-soft); }
 
 /* ============ Team race lane ============ */
-.race { margin: var(--sp-4) var(--sp-5) 0; background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-lg); }
+.overview { display: flex; gap: var(--sp-4); align-items: flex-start; margin: var(--sp-4) var(--sp-5) 0; }
+.race { flex: 1 1 0; min-width: 0; background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-lg); }
+
+/* ============ Progress summary ============ */
+.progress { flex: 0 0 320px; background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-lg); padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+.progress h2 { margin: 0 0 var(--sp-3); font-size: 14px; }
+.pct-big { display: flex; align-items: baseline; gap: var(--sp-2); }
+.pct-big strong { font-size: 34px; line-height: 1; color: var(--neon-green); text-shadow: 0 0 12px rgba(57, 255, 136, .55); }
+.pct-sub { font-size: 12px; color: var(--ink-soft); margin: var(--sp-1) 0 var(--sp-3); }
+.stack { display: flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--bg); border: 1px solid var(--edge); }
+.seg { display: block; min-width: 4px; }
+.seg[data-status="Done"], .swatch[data-status="Done"] { background: var(--neon-green); }
+.seg[data-status="In Progress"], .swatch[data-status="In Progress"] { background: var(--neon-cyan); }
+.seg[data-status="Blocked"], .swatch[data-status="Blocked"] { background: var(--neon-violet); }
+.seg[data-status="Backlog"], .swatch[data-status="Backlog"] { background: #3d4691; }
+.status-legend { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: var(--sp-1); font-size: 12px; }
+.status-legend li { display: grid; grid-template-columns: 12px 1fr auto auto; gap: var(--sp-2); align-items: center; }
+.swatch { width: 10px; height: 10px; border-radius: 3px; }
+.status-legend .num { color: var(--ink-soft); text-align: right; min-width: 24px; }
+.status-legend .pc { font-weight: 700; text-align: right; min-width: 40px; }
+.by-project { margin: var(--sp-4) 0 0; padding: var(--sp-3) 0 0; border-top: 1px solid var(--edge); list-style: none; display: grid; gap: var(--sp-2); }
+.by-project li { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--sp-2); font-size: 12px; }
+.by-project .pname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.by-project .pval { font-weight: 700; color: var(--neon-green); }
+.mini-bar { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: var(--bg); border: 1px solid var(--edge); overflow: hidden; }
+.mini-bar span { display: block; height: 100%; background: var(--neon-green); }
 .race summary { cursor: pointer; padding: var(--sp-3) var(--sp-4); font-weight: 700; color: var(--ink); }
 .race-sub { font-weight: 400; font-size: 12px; color: var(--ink-soft); margin-left: var(--sp-2); }
 .lane { padding: 0 var(--sp-4) var(--sp-3); }
@@ -237,7 +262,8 @@ form { padding: var(--sp-4); display: grid; grid-template-columns: 1fr 1fr; gap:
   .summary { margin-left: 0; }
   .note { margin-left: 0; }
   form { grid-template-columns: 1fr; }
-  .race { margin-left: var(--sp-4); margin-right: var(--sp-4); }
+  .overview { flex-direction: column; align-items: stretch; margin-left: var(--sp-4); margin-right: var(--sp-4); }
+  .progress { flex: none; }
   .race-row { grid-template-columns: 20px 1fr 70px; }
   .race-row .track { grid-column: 1 / -1; grid-row: 2; }
 }
@@ -319,10 +345,18 @@ form { padding: var(--sp-4); display: grid; grid-template-columns: 1fr 1fr; gap:
 </section>
 
 <!-- ============ Team race lane (rendered by renderRace) ============ -->
-<details class="race" id="raceDetails" open>
-  <summary>Team race<span class="race-sub">Each racer advances as their tasks move toward Done</span></summary>
-  <div class="lane" id="raceLane"></div>
-</details>
+<div class="overview">
+  <details class="race" id="raceDetails" open>
+    <summary>Team race<span class="race-sub">Each racer advances as their tasks move toward Done</span></summary>
+    <div class="lane" id="raceLane"></div>
+  </details>
+
+  <!-- ============ Progress summary (rendered by renderProgress) ============ -->
+  <section class="progress" aria-labelledby="progressTitle">
+    <h2 id="progressTitle">Progress</h2>
+    <div id="progressBody"></div>
+  </section>
+</div>
 
 <!-- ============ Kanban board (rendered by renderBoard) ============ -->
 <main>
@@ -785,6 +819,36 @@ function renderRace() {
   requestAnimationFrame(() => requestAnimationFrame(() => list.classList.add("go")));
 }
 
+// Whole-team completion: overall percent, status breakdown and per-project progress (ignores filters).
+function renderProgress() {
+  const total = state.tasks.length;
+  const pct = (n, of) => (of ? Math.round((n / of) * 100) : 0);
+  const counts = STATUSES.map((s) => ({ name: s.name, n: state.tasks.filter((t) => t.status === s.name).length }));
+  const done = counts.find((c) => c.name === "Done").n;
+  const donePct = pct(done, total);
+  const summary = `${done} of ${total} tasks done, ${total - done} not done`;
+
+  const bar = counts.filter((c) => c.n).map((c) =>
+    `<span class="seg" data-status="${escapeHtml(c.name)}" style="flex:${c.n}" title="${escapeHtml(c.name)}: ${c.n}"></span>`).join("");
+  const legend = counts.map((c) =>
+    `<li><span class="swatch" data-status="${escapeHtml(c.name)}"></span><span>${escapeHtml(c.name)}</span><span class="num">${c.n}</span><span class="pc">${pct(c.n, total)}%</span></li>`).join("");
+  const projects = PROJECTS.map((p) => {
+    const list = state.tasks.filter((t) => t.project === p);
+    return { name: p, total: list.length, done: list.filter((t) => t.status === "Done").length };
+  }).filter((p) => p.total).map((p) => {
+    const v = pct(p.done, p.total);
+    return `<li><span class="pname">${escapeHtml(p.name)}</span><span class="pval">${v}%</span>
+      <div class="mini-bar" role="img" aria-label="${escapeHtml(p.name)}: ${p.done} of ${p.total} done"><span style="width:${v}%"></span></div></li>`;
+  }).join("");
+
+  $("progressBody").innerHTML = `
+    <div class="pct-big"><strong>${donePct}%</strong><span>done</span><span class="pct-sub">${100 - donePct}% not done</span></div>
+    <p class="pct-sub">${escapeHtml(summary)}</p>
+    <div class="stack" role="img" aria-label="${escapeHtml(summary)}">${bar}</div>
+    <ul class="status-legend">${legend}</ul>
+    <ul class="by-project" aria-label="Done percentage by project">${projects}</ul>`;
+}
+
 // The only function that writes card/column markup.
 function renderBoard() {
   const visible = sortTasks(applyFilters(state.tasks));
@@ -803,6 +867,7 @@ function renderBoard() {
   renderSummary();
   renderTrainer();
   renderRace();
+  renderProgress();
 }
 
 /* ============ State mutations ============ */
