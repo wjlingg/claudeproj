@@ -259,8 +259,38 @@ form { padding: var(--sp-4); display: grid; grid-template-columns: 1fr 1fr; gap:
 .briefing-details dd { margin: 0; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
 .briefing-actions { display: flex; justify-content: flex-end; margin-top: var(--sp-4); }
 
+/* ============ Chatbot ============ */
+.chatbot-fab {
+  position: fixed; right: var(--sp-4); bottom: var(--sp-4); z-index: 900;
+  width: 58px; height: 58px; padding: 0; border-radius: 50%; border: 2px solid var(--neon-cyan);
+  background: linear-gradient(135deg, var(--neon-violet), var(--neon-cyan));
+  box-shadow: 0 0 18px rgba(166, 107, 255, .55), 0 4px 12px rgba(0, 0, 0, .5);
+}
+.chatbot-fab svg { width: 34px; height: 34px; display: block; margin: 0 auto; }
+@media (hover: hover) and (pointer: fine) {
+  .chatbot-fab { transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out); }
+  .chatbot-fab:hover { transform: scale(1.06); box-shadow: 0 0 24px rgba(34, 230, 255, .7), 0 4px 12px rgba(0, 0, 0, .5); }
+}
+.chatbot { width: min(480px, 94vw); border-color: var(--neon-violet); box-shadow: 0 0 18px rgba(166, 107, 255, .45); }
+.chatbot-body { padding: var(--sp-4); display: grid; gap: var(--sp-3); }
+.chat-intro { margin: 0; color: var(--ink-soft); font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.chip {
+  border: 1px solid var(--neon-cyan); background: rgba(34, 230, 255, .08); color: var(--neon-cyan);
+  border-radius: 999px; padding: var(--sp-1) var(--sp-3); font-size: 12px; font-weight: 600; text-align: left;
+}
+.chip:hover { background: rgba(34, 230, 255, .2); }
+.chat-log { display: grid; gap: var(--sp-2); max-height: 40vh; overflow-y: auto; }
+.chat-q { justify-self: end; max-width: 85%; background: rgba(166, 107, 255, .22); border: 1px solid var(--neon-violet); border-radius: var(--radius-lg); padding: var(--sp-2) var(--sp-3); font-size: 13px; font-weight: 600; }
+.chat-a { justify-self: start; max-width: 95%; background: var(--surface-2); border: 1px solid var(--edge); border-radius: var(--radius-lg); padding: var(--sp-2) var(--sp-3); font-size: 13px; }
+.chat-a p { margin: 0 0 var(--sp-1); }
+.chat-a ul { margin: var(--sp-1) 0; padding-left: var(--sp-4); display: grid; gap: var(--sp-1); }
+.chat-a .id { font-family: ui-monospace, Consolas, monospace; font-weight: 700; color: var(--neon-cyan); }
+.chat-a .show { margin-top: var(--sp-2); }
+.chat-foot { display: flex; justify-content: flex-end; }
+
 /* ============ Toasts ============ */
-.toasts { position: fixed; right: var(--sp-4); bottom: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); z-index: 1000; max-width: min(380px, 92vw); }
+.toasts { position: fixed; right: var(--sp-4); bottom: calc(var(--sp-4) + 70px); display: flex; flex-direction: column; gap: var(--sp-2); z-index: 1000; max-width: min(380px, 92vw); }
 .toast { background: var(--surface-3); color: var(--ink); border: 1px solid var(--edge); border-left: 6px solid var(--neon-cyan); padding: var(--sp-3) var(--sp-4); border-radius: var(--radius); box-shadow: 0 4px 16px rgba(0, 0, 0, .6), var(--glow-cyan); }
 .toast.warn { background: var(--warn-bg); border-left-color: var(--p-high); box-shadow: 0 4px 16px rgba(0, 0, 0, .6); }
 
@@ -446,6 +476,30 @@ form { padding: var(--sp-4); display: grid; grid-template-columns: 1fr 1fr; gap:
   </div>
 </dialog>
 
+<!-- ============ Chatbot: floating icon + dialog with suggested IT-project queries ============ -->
+<button type="button" class="chatbot-fab" id="chatbotBtn" aria-label="Open IT project assistant" aria-haspopup="dialog">
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M16 3v4" stroke="#04101a" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <circle cx="16" cy="3" r="1.8" fill="#04101a"/>
+    <rect x="5" y="7" width="22" height="17" rx="6" fill="#04101a"/>
+    <circle cx="12" cy="15" r="2.6" fill="#22e6ff"/><circle cx="20" cy="15" r="2.6" fill="#22e6ff"/>
+    <path d="M12.5 20h7" stroke="#a66bff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <path d="M10 24l-3 5 8-5z" fill="#04101a"/>
+  </svg>
+</button>
+<dialog id="chatbotDialog" class="chatbot" aria-labelledby="chatbotTitle">
+  <div class="dialog-head">
+    <h2 id="chatbotTitle">IT Project Assistant</h2>
+    <button type="button" class="mini" id="closeChatbot" aria-label="Close assistant">✕</button>
+  </div>
+  <div class="chatbot-body">
+    <p class="chat-intro">Pick a question about the IT projects. Answers come from the tasks on this board, so they match what you see.</p>
+    <div class="chips" id="chatChips" role="group" aria-label="Suggested questions"></div>
+    <div class="chat-log" id="chatLog" aria-live="polite"></div>
+    <div class="chat-foot"><button type="button" class="mini" id="clearChat">Clear chat</button></div>
+  </div>
+</dialog>
+
 <!-- Toast region: announced politely by screen readers -->
 <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 
@@ -497,6 +551,7 @@ const PRIORITY_RANK = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 function defaultFilters() {
   return { search: "", project: "", status: "", priority: "", assignee: "", sort: "", overdueOnly: false };
 }
+const FILTER_CONTROLS = { fSearch: "search", fProject: "project", fStatus: "status", fPriority: "priority", fAssignee: "assignee", fSort: "sort" };
 const state = {
   tasks: [],
   filters: defaultFilters(),
@@ -1137,7 +1192,7 @@ function daysUntil(iso) {
 function showBriefing() {
   const days = daysUntil(BRIEFING.date);
   if (days < 0) return;                                              // the briefing has passed: nothing to announce
-  if ($("addDialog").open) { setTimeout(showBriefing, 3000); return; }   // never interrupt the Add Task form
+  if ($("addDialog").open || $("chatbotDialog").open) { setTimeout(showBriefing, 3000); return; }   // never interrupt a form or the assistant
   const [h, min] = BRIEFING.time.split(":").map(Number);
   $("briefingCountdown").textContent = days === 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
   $("briefingDate").textContent = new Date(...BRIEFING.date.split("-").map((n, i) => (i === 1 ? n - 1 : Number(n))))
@@ -1146,6 +1201,95 @@ function showBriefing() {
   $("briefingVenue").textContent = BRIEFING.venue;
   $("briefingDialog").showModal();
   $("okBriefing").focus();
+}
+
+/* ============ Chatbot: suggested IT-project queries, answered from state.tasks (no network) ============ */
+function syncFilterControls() {
+  Object.keys(FILTER_CONTROLS).forEach((cid) => { $(cid).value = state.filters[FILTER_CONTROLS[cid]]; });
+  $("fOverdue").checked = state.filters.overdueOnly;
+}
+
+function taskLine(t) {
+  return `<span class="id">${escapeHtml(t.id)}</span> ${escapeHtml(t.title)} (${escapeHtml(t.assignee)}, due ${escapeHtml(formatDate(t.dueDate))})`;
+}
+function taskAnswer(intro, tasks, preset, none) {
+  if (!tasks.length) return { intro: none };
+  return { intro, items: tasks.slice(0, 5).map(taskLine).concat(tasks.length > 5 ? [`and ${tasks.length - 5} more`] : []), preset };
+}
+function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
+
+const SUGGESTED_QUERIES = [
+  { id: "overdue", label: "What is overdue?", answer() {
+    const l = state.tasks.filter(isOverdue);
+    return taskAnswer(`${plural(l.length, "task is", "tasks are")} past due:`, l, { overdueOnly: true }, "Nothing is overdue. Nice work!");
+  } },
+  { id: "blocked", label: "What is blocked right now?", answer() {
+    const l = state.tasks.filter((t) => t.status === "Blocked");
+    return taskAnswer(`${plural(l.length, "task is", "tasks are")} blocked:`, l, { status: "Blocked" }, "Nothing is blocked.");
+  } },
+  { id: "critical", label: "Which tasks are Critical?", answer() {
+    const l = state.tasks.filter((t) => t.priority === "Critical" && t.status !== "Done");
+    return taskAnswer(`${plural(l.length, "Critical task is", "Critical tasks are")} still open:`, l, { priority: "Critical" }, "No open Critical tasks.");
+  } },
+  { id: "week", label: "What is due in the next 7 days?", answer() {
+    const l = state.tasks.filter((t) => t.status !== "Done" && daysUntil(t.dueDate) >= 0 && daysUntil(t.dueDate) <= 7)
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+    return taskAnswer(`${plural(l.length, "task is", "tasks are")} due within a week:`, l, { sort: "due" }, "Nothing else is due in the next 7 days.");
+  } },
+  { id: "progress", label: "How is each project progressing?", answer() {
+    const rows = PROJECTS.map((p) => {
+      const list = state.tasks.filter((t) => t.project === p);
+      return { p, total: list.length, done: list.filter((t) => t.status === "Done").length };
+    }).filter((r) => r.total);
+    return { intro: "Done by project:", items: rows.map((r) => `${escapeHtml(r.p)}: ${Math.round((r.done / r.total) * 100)}% (${r.done} of ${r.total})`) };
+  } },
+  { id: "workload", label: "Who has the most open tasks?", answer() {
+    const counts = new Map();
+    state.tasks.filter((t) => t.status !== "Done").forEach((t) => counts.set(t.assignee, (counts.get(t.assignee) || 0) + 1));
+    const top = Array.from(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3);
+    if (!top.length) return { intro: "Everyone is caught up. No open tasks." };
+    return { intro: `${top[0][0]} has the most open work:`, items: top.map(([n, c]) => `${escapeHtml(n)}: ${plural(c, "open task", "open tasks")}`), preset: { assignee: top[0][0] } };
+  } },
+  { id: "briefing", label: "When is the next IT Project Briefing?", answer() {
+    const days = daysUntil(BRIEFING.date);
+    if (days < 0) return { intro: "The scheduled IT Project Briefing has already taken place." };
+    const [h, m] = BRIEFING.time.split(":").map(Number);
+    const when = days === 0 ? "today" : days === 1 ? "tomorrow" : `in ${days} days`;
+    return { intro: `It is ${when}: ${formatDate(BRIEFING.date)} at ${new Date(2000, 0, 1, h, m).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}, ${BRIEFING.venue}.` };
+  } },
+  { id: "level", label: "What level is the team?", answer() {
+    const xp = totalXp(), into = xp % XP_PER_LEVEL;
+    return { intro: `The team is Lv ${levelFor(xp)} with ${into} of ${XP_PER_LEVEL} XP. ${XP_PER_LEVEL - into} more XP to level up: finish a task to earn it.` };
+  } }
+];
+
+function askChat(id) {
+  const q = SUGGESTED_QUERIES.find((s) => s.id === id);
+  if (!q) return;
+  const a = q.answer();
+  const items = a.items ? `<ul>${a.items.map((i) => `<li>${i}</li>`).join("")}</ul>` : "";
+  const show = a.preset ? `<button type="button" class="mini show" data-show="${escapeHtml(q.id)}">Show on board</button>` : "";
+  const log = $("chatLog");
+  log.insertAdjacentHTML("beforeend", `<div class="chat-q">${escapeHtml(q.label)}</div><div class="chat-a"><p>${escapeHtml(a.intro)}</p>${items}${show}</div>`);
+  while (log.children.length > 12) log.removeChild(log.firstChild);
+  log.scrollTop = log.scrollHeight;
+}
+
+function showOnBoard(id) {
+  const q = SUGGESTED_QUERIES.find((s) => s.id === id);
+  const preset = q && q.answer().preset;
+  if (!preset) return;
+  state.filters = Object.assign(defaultFilters(), preset);
+  syncFilterControls();
+  renderBoard();
+  $("chatbotDialog").close();
+  showToast("Board filtered: " + q.label);
+}
+
+function openChatbot() {
+  $("chatbotDialog").showModal();
+  const first = $("chatChips").querySelector(".chip");
+  if (first) first.focus();
 }
 
 function openAddDialog() {
@@ -1165,7 +1309,7 @@ function init() {
   fillSelect($("fStatus"), STATUSES.map((s) => s.name));
 
   // Filters: control id -> state.filters key
-  const filterControls = { fSearch: "search", fProject: "project", fStatus: "status", fPriority: "priority", fAssignee: "assignee", fSort: "sort" };
+  const filterControls = FILTER_CONTROLS;
   Object.keys(filterControls).forEach((cid) => {
     $(cid).addEventListener("input", (e) => { state.filters[filterControls[cid]] = e.target.value; renderBoard(); });
   });
@@ -1201,6 +1345,23 @@ function init() {
     if (e.key === "Escape" && (state.moveOpenId || state.confirmDeleteId)) {
       state.moveOpenId = null; state.confirmDeleteId = null; renderBoard();
     }
+  });
+
+  // Chatbot: icon opens the dialog; chips ask a suggested question
+  SUGGESTED_QUERIES.forEach((q) => {
+    const chip = document.createElement("button");
+    chip.type = "button"; chip.className = "chip"; chip.dataset.query = q.id; chip.textContent = q.label;
+    $("chatChips").appendChild(chip);
+  });
+  $("chatbotBtn").addEventListener("click", openChatbot);
+  $("closeChatbot").addEventListener("click", () => $("chatbotDialog").close());
+  $("clearChat").addEventListener("click", () => { $("chatLog").innerHTML = ""; });
+  $("chatbotDialog").addEventListener("close", () => $("chatbotBtn").focus());
+  $("chatbotDialog").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    const show = e.target.closest("[data-show]");
+    if (chip) askChat(chip.dataset.query);
+    else if (show) showOnBoard(show.dataset.show);
   });
 
   $("closeBriefing").addEventListener("click", () => $("briefingDialog").close());
