@@ -15,6 +15,7 @@ A single-file, Pokémon-style Kanban board for an IT PMO team at a fictitious ba
 - Trainer level and XP bar: finishing a task earns XP by priority, with a bonus for on-time delivery, plus a level-up toast
 - Team race lane: one racer per assignee advances as their tasks move toward Done
 - Progress summary beside the race: overall percent done and not done, a status breakdown bar, and percent done per project
+- IT Project Briefing reminder: a popup opens 10 seconds after the page loads (Wed 14 Oct 2026, 2:00 PM, Town Hall Meeting Room) and stops showing once the date has passed
 - Add Task dialog with inline validation
 - Priority signals and automatic overdue highlighting
 - Inline "Delete? Yes / No" confirmation (no browser dialogs)
@@ -47,6 +48,8 @@ index.html                 the whole app (markup, styles, script)
 CLAUDE.md                  guidance for Claude Code
 .claude/commands/          project slash commands
 .claude/skills/            project skills (design, animation review, Kanban gamification)
+.claude/agents/            project agents (security scanner)
+.claude/hooks/             Claude Code hook that guards the briefing popup (wired up in .claude/settings.json)
 .github/workflows/         CI, security scan, Pages deploy
 ```
 

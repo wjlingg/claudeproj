@@ -249,6 +249,16 @@ form { padding: var(--sp-4); display: grid; grid-template-columns: 1fr 1fr; gap:
 .form-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: var(--sp-2); }
 .req { color: var(--p-critical); }
 
+/* ============ Briefing popup ============ */
+.briefing { width: min(420px, 94vw); overflow-x: hidden; border-color: var(--neon-violet); box-shadow: 0 0 18px rgba(166, 107, 255, .45); }
+.briefing-body { padding: var(--sp-4); }
+.briefing-when { margin: 0 0 var(--sp-3); font-weight: 700; color: var(--neon-green); text-shadow: 0 0 8px rgba(57, 255, 136, .5); }
+.briefing-details { margin: 0; display: grid; gap: var(--sp-3); }
+.briefing-details div { display: grid; grid-template-columns: 90px 1fr; gap: var(--sp-3); align-items: baseline; }
+.briefing-details dt { color: var(--ink-soft); font-size: 12px; font-weight: 600; }
+.briefing-details dd { margin: 0; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.briefing-actions { display: flex; justify-content: flex-end; margin-top: var(--sp-4); }
+
 /* ============ Toasts ============ */
 .toasts { position: fixed; right: var(--sp-4); bottom: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); z-index: 1000; max-width: min(380px, 92vw); }
 .toast { background: var(--surface-3); color: var(--ink); border: 1px solid var(--edge); border-left: 6px solid var(--neon-cyan); padding: var(--sp-3) var(--sp-4); border-radius: var(--radius); box-shadow: 0 4px 16px rgba(0, 0, 0, .6), var(--glow-cyan); }
@@ -419,6 +429,23 @@ form { padding: var(--sp-4); display: grid; grid-template-columns: 1fr 1fr; gap:
   </form>
 </dialog>
 
+<!-- ============ IT Project Briefing popup (opens after 10 seconds on the page) ============ -->
+<dialog id="briefingDialog" class="briefing" aria-labelledby="briefingTitle">
+  <div class="dialog-head">
+    <h2 id="briefingTitle">IT Project Briefing</h2>
+    <button type="button" class="mini" id="closeBriefing" aria-label="Close briefing reminder">✕</button>
+  </div>
+  <div class="briefing-body">
+    <p class="briefing-when" id="briefingCountdown"></p>
+    <dl class="briefing-details">
+      <div><dt>📅 Date</dt><dd id="briefingDate"></dd></div>
+      <div><dt>🕑 Time</dt><dd id="briefingTime"></dd></div>
+      <div><dt>📍 Venue</dt><dd id="briefingVenue"></dd></div>
+    </dl>
+    <div class="briefing-actions"><button type="button" class="btn" id="okBriefing">Got it</button></div>
+  </div>
+</dialog>
+
 <!-- Toast region: announced politely by screen readers -->
 <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 
@@ -446,6 +473,10 @@ const STATUSES = [
 const PROJECTS = ["Core Banking Upgrade", "Digital Channels", "Cybersecurity Uplift", "Data & Analytics", "Infrastructure & Cloud", "Vendor Management"];
 const CATEGORIES = ["Application Development", "Infrastructure", "Cybersecurity", "Data", "Compliance", "Vendor"];
 const PRIORITIES = ["Critical", "High", "Medium", "Low"];
+
+/* ---- IT Project Briefing reminder: popup opens after BRIEFING_DELAY_MS on the page ---- */
+const BRIEFING_DELAY_MS = 10000;
+const BRIEFING = { date: "2026-10-14", time: "14:00", venue: "Town Hall Meeting Room" };
 
 /* ---- Gamification reference data (all derived at render time, never stored) ---- */
 const STAGE = { "Backlog": 1, "In Progress": 2, "Blocked": 2, "Done": 3 };
@@ -1096,6 +1127,27 @@ function fillSelect(select, options, selected) {
   });
 }
 
+/* ============ Briefing popup ============ */
+function daysUntil(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const [ty, tm, td] = todayISO().split("-").map(Number);
+  return Math.round((new Date(y, m - 1, d) - new Date(ty, tm - 1, td)) / 86400000);
+}
+
+function showBriefing() {
+  const days = daysUntil(BRIEFING.date);
+  if (days < 0) return;                                              // the briefing has passed: nothing to announce
+  if ($("addDialog").open) { setTimeout(showBriefing, 3000); return; }   // never interrupt the Add Task form
+  const [h, min] = BRIEFING.time.split(":").map(Number);
+  $("briefingCountdown").textContent = days === 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
+  $("briefingDate").textContent = new Date(...BRIEFING.date.split("-").map((n, i) => (i === 1 ? n - 1 : Number(n))))
+    .toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  $("briefingTime").textContent = new Date(2000, 0, 1, h, min).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  $("briefingVenue").textContent = BRIEFING.venue;
+  $("briefingDialog").showModal();
+  $("okBriefing").focus();
+}
+
 function openAddDialog() {
   $("dueDate").min = todayISO();
   $("addDialog").showModal();
@@ -1150,6 +1202,10 @@ function init() {
       state.moveOpenId = null; state.confirmDeleteId = null; renderBoard();
     }
   });
+
+  $("closeBriefing").addEventListener("click", () => $("briefingDialog").close());
+  $("okBriefing").addEventListener("click", () => $("briefingDialog").close());
+  setTimeout(showBriefing, BRIEFING_DELAY_MS);
 
   seedTasks();
   state.lastLevel = levelFor(totalXp());
